@@ -38,42 +38,59 @@ window.addEventListener('crumbsData', (event) => {
         // Làm sạch apiParams bằng cách loại bỏ các giá trị không hợp lệ
         apiParams = cleanObject(apiParams);
 
-        let mapApiParams = new Map()
-        Object.entries(apiParams).forEach( ([key, value]) => {
-          mapApiParams.set(key, value)
-        })
+        // Chuyển apiParams thành Map để dễ truy cập và sử dụng
+        let mapApiParams = new Map();
+        Object.entries(apiParams).forEach(([key, value]) => {
+          mapApiParams.set(key, value);
+        });
 
-        let mapLabels = new Map()
-        if(cond.label) {
-          Object.entries(cond.label).forEach( ([key, value]) => {
+        // Xử lý labels: chuyển thành Map, hỗ trợ các labels lồng nhau
+        let mapLabels = new Map();
+        if (cond.label) {
+          Object.entries(cond.label).forEach(([key, value]) => {
             if (typeof value === 'string' || value instanceof String) {
-              mapLabels.set(key, value)
+              // Nếu value là chuỗi, thêm trực tiếp vào Map
+              mapLabels.set(key, value);
             } else {
-              Object.entries(value).forEach( ([key2, value2]) => {
-                mapLabels.set(`${key}.${key2}`, value2)
-              })
+              // Nếu value là object, duyệt qua và thêm vào Map với key lồng nhau
+              Object.entries(value).forEach(([key2, value2]) => {
+                mapLabels.set(`${key}.${key2}`, value2);
+              });
             }
-          })
+          });
         }
 
-        let mapAlertValues = new Map()
+        // Xử lý alerts: chuyển thành Map
+        let mapAlertValues = new Map();
         if (cond.alerts) {
-          Object.entries(cond.alerts).forEach( ([key, value]) => {
-            mapAlertValues.set(key, value)
-          })
+          Object.entries(cond.alerts).forEach(([key, value]) => {
+            mapAlertValues.set(key, value);
+          });
         }
 
+        // Tạo đối tượng tóm tắt condition
         let summaryObject = {
-          id: cond.id,
-          url: cond.url,
-          saveName: cond.saveName,
-          date: cond.date,
-          apiParams: mapApiParams,
-          labels: mapLabels,
-          alertValues: mapAlertValues,
-        }
+          id: cond.id,               // ID của condition
+          url: cond.url,             // URL liên quan
+          saveName: cond.saveName,   // Tên condition
+          date: cond.date,           // Ngày tạo condition
+          apiParams: mapApiParams,   // Map của các apiParams đã làm sạch
+          labels: mapLabels,         // Map của các labels
+          alertValues: mapAlertValues // Map của các giá trị alerts
+        };
 
-        console.log(summaryObject)
+        // Log đối tượng tóm tắt condition ra console
+        console.log(summaryObject);
+        let parentDiv = findDivOfCondition(cond.id)
+        //TODO: Append thêm các element dưới đây vào parentDiv
+        //<div><strong>id<strong>: <i>{{summaryObject.id}}</i></div>
+        //<div><strong>url<strong>: <i>{{summaryObject.url}}</i></div>
+        //<div><strong>saveName<strong>: <i>{{summaryObject.saveName}}</i></div>
+        //<div><strong>saveName<strong>: <i>{{summaryObject.saveName}}</i></div>
+        // Tạo table có 3 column
+        // Column #1: chứa list các key-value trong map summaryObject.apiParams (mỗi key-value xuống một hàng)
+        // Column #2: chứa list các key-value trong map summaryObject.labels (mỗi key-value xuống một hàng)
+        // Column #3: chứa list các key-value trong map summaryObject.alertValues (mỗi key-value xuống một hàng)
       }
     },
     error: function (xhr, status, error) {
