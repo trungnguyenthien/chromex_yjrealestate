@@ -34,19 +34,46 @@ window.addEventListener('crumbsData', (event) => {
 
       // Duyệt qua từng condition
       for (const cond of conditions) {
-        let id = cond.id; // ID của condition
         let apiParams = cond.apiParams; // Các tham số của API liên quan đến condition
-
         // Làm sạch apiParams bằng cách loại bỏ các giá trị không hợp lệ
         apiParams = cleanObject(apiParams);
 
-        let label = cond.label; // Label của condition
-        let alerts = cond.alerts; // Alerts liên quan đến condition
+        let mapApiParams = new Map()
+        Object.entries(apiParams).forEach( ([key, value]) => {
+          mapApiParams.set(key, value)
+        })
 
-        // In thông tin condition ra console
-        console.log(`condition id = ${id}`);
-        console.log(`apiParams===`);
-        console.log(apiParams);
+        let mapLabels = new Map()
+        if(cond.label) {
+          Object.entries(cond.label).forEach( ([key, value]) => {
+            if (typeof value === 'string' || value instanceof String) {
+              mapLabels.set(key, value)
+            } else {
+              Object.entries(value).forEach( ([key2, value2]) => {
+                mapLabels.set(`${key}.${key2}`, value2)
+              })
+            }
+          })
+        }
+
+        let mapAlertValues = new Map()
+        if (cond.alerts) {
+          Object.entries(cond.alerts).forEach( ([key, value]) => {
+            mapAlertValues.set(key, value)
+          })
+        }
+
+        let summaryObject = {
+          id: cond.id,
+          url: cond.url,
+          saveName: cond.saveName,
+          date: cond.date,
+          apiParams: mapApiParams,
+          labels: mapLabels,
+          alertValues: mapAlertValues,
+        }
+
+        console.log(summaryObject)
       }
     },
     error: function (xhr, status, error) {
