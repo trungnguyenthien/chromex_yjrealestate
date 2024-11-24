@@ -47,7 +47,8 @@ window.addEventListener('crumbsData', (event) => {
           Object.entries(apiParams).forEach(([key, value]) => {
             mapApiParams.set(key, value);
           });
-
+          mapApiParams = mergeKey(mapApiParams, 'lc', 'pf')
+          mapApiParams = reorderMap(mapApiParams, ['lc/pf', 'geo', 'oaza', 'ln', 'lnc', 'st', 'st_cmt', 'sort' , 'cmt', 'cmt_from', 'cmt_to'])
           // Xử lý labels: chuyển thành Map, hỗ trợ các labels lồng nhau
           let mapLabels = new Map();
           if (cond.label) {
@@ -293,5 +294,65 @@ function extractQuery(url) {
     baseUrl: baseUrl,
     params: params
   };
+}
+
+/**
+ * Hàm merge hai key trong map thành một key mới với value được nối bằng "/"
+ * @param {Map} map - Đối tượng kiểu Map cần xử lý
+ * @param {string} key1 - Key đầu tiên cần merge
+ * @param {string} key2 - Key thứ hai cần merge
+ * @returns {Map} - Đối tượng Map mới sau khi merge
+ */
+function mergeKey(map, key1, key2) {
+  // Lấy giá trị của key1 và key2, nếu không tồn tại thì gán mặc định là "--"
+  const value1 = map.get(key1) || "--";
+  const value2 = map.get(key2) || "--";
+  // Tạo key mới và value mới
+  const newKey = `${key1}/${key2}`;
+  const newValue = `${value1}/${value2}`;
+  // Tạo Map mới từ Map ban đầu
+  const newMap = new Map(map);
+  // Thêm key mới vào Map mới
+  newMap.set(newKey, newValue);
+  // Xoá key cũ khỏi Map mới
+  newMap.delete(key1);
+  newMap.delete(key2);
+  // Trả về Map mới
+  return newMap;
+}
+
+/**
+ * Sắp xếp thứ tự các keyValue trong Map theo thứ tự arrKey (nếu tồn tại),
+ * các key còn lại sẽ được xếp theo thứ tự abc.
+ * @param {Map} map - Đối tượng kiểu Map cần sắp xếp
+ * @param {Array} arrKey - Mảng chứa thứ tự ưu tiên của các key
+ * @returns {Map} - Đối tượng Map mới với thứ tự key đã sắp xếp
+ */
+function reorderMap(map, arrKey) {
+  // Tạo mảng chứa các keyValue trong Map
+  const entries = Array.from(map.entries());
+
+  // Phân loại key theo arrKey và các key còn lại
+  const orderedEntries = [];
+  const remainingEntries = [];
+
+  for (const [key, value] of entries) {
+    if (arrKey.includes(key)) {
+      // Đưa các key có trong arrKey vào orderedEntries theo thứ tự arrKey
+      const index = arrKey.indexOf(key);
+      orderedEntries[index] = [key, value];
+    } else {
+      // Đưa các key còn lại vào remainingEntries
+      remainingEntries.push([key, value]);
+    }
+  }
+  // Sắp xếp các key còn lại theo thứ tự abc
+  remainingEntries.sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+
+  // Loại bỏ các phần tử trống trong orderedEntries (nếu có)
+  const finalOrderedEntries = orderedEntries.filter(Boolean).concat(remainingEntries);
+
+  // Trả về Map mới với thứ tự đã sắp xếp
+  return new Map(finalOrderedEntries);
 }
 
