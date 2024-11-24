@@ -85,15 +85,9 @@ window.addEventListener('crumbsData', (event) => {
           let parentDiv = findDivOfCondition(cond.id);
           if (parentDiv) {
             // Append các element vào parentDiv
-            // Thêm các thông tin cơ bản
-            parentDiv.append(`<div><b>saveName</b>: <code>${summaryObject.saveName}</code></div>`);
-            parentDiv.append(`<div><b>date</b>: <code>${summaryObject.date}</code></div>`);
-            parentDiv.append(`<div><b>id</b>: <code>${summaryObject.id}</code></div>`);
-            parentDiv.append(`<div><b>url</b>: <a href="${summaryObject.url}" target=blank>${summaryObject.url}</a></div>`);
-
             // Tạo bảng
             let table = $('<table border="1" style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 10px;">');
-            
+
             // Tạo header cho bảng
             table.append(`
               <thead style="background-color: ${textColor}; color: white; font-size: 1.1em;">
@@ -113,6 +107,50 @@ window.addEventListener('crumbsData', (event) => {
           `);
             // Append bảng vào parentDiv
             parentDiv.append(table);
+
+            // Thêm các thông tin cơ bản vào parentDiv
+            parentDiv.append(`<br/>`);
+            parentDiv.append(`<div><b>⚡️ id</b>: <code>${summaryObject.id}</code></div>`);
+            parentDiv.append(`<div><b>⚡️ url</b>: <a href="${summaryObject.url}" target="_blank">${summaryObject.url}</a></div>`);
+
+            // Phân tích URL bằng hàm extractQuery
+            let urlInfos = extractQuery(summaryObject.url);
+
+            // Tạo link text để hiển thị nội dung URL details
+            const linkText = $(`
+  <a href="#" style="color: #007BFF; text-decoration: underline; cursor: pointer; margin-top: 10px;">
+    🔻 Parse URL Details
+  </a>
+`);
+
+            // Nội dung URL details
+            const urlDetails = $(`
+  <div style="display: none; border: 1px solid #ddd; margin-top: 10px; padding: 10px; border-radius: 5px; background-color: #f9f9f9;">
+    <div><b></b> <code>${urlInfos.baseUrl}</code></div>
+    <ul>
+      ${Array.from(urlInfos.params.entries())
+                .map(([key, value]) => `<li> -- <b>${key}:</b> ${value}</li>`)
+                .join('')}
+    </ul>
+  </div>
+`);
+
+            // Thêm link text và nội dung URL details vào parentDiv
+            parentDiv.append(linkText);
+            parentDiv.append(urlDetails);
+
+            // Xử lý sự kiện click cho link text
+            linkText.on('click', function (e) {
+              e.preventDefault(); // Ngăn chặn hành động mặc định của link
+              if (urlDetails.is(':visible')) {
+                urlDetails.slideUp(); // Ẩn nội dung
+                linkText.text('🔻 Parse URL Details');
+              } else {
+                urlDetails.slideDown(); // Hiển thị nội dung
+                linkText.text('🔺 Hide URL Details');
+              }
+            });
+
           } else {
             console.error(`Không tìm thấy parentDiv cho condition id: ${cond.id}`);
           }
@@ -230,4 +268,25 @@ function addButtonToTopDiv(topDiv, url) {
       $(this).css('backgroundColor', textColor);
     }
   );
+}
+
+/**
+ * Phân tích URL và trả về object chứa baseUrl và params
+ * @param {string} url - Đường dẫn cần phân tích
+ * @returns {Object} - Object chứa baseUrl và params (dạng Map)
+ */
+function extractQuery(url) {
+  // Tạo đối tượng URL từ chuỗi url
+  const urlObject = new URL(url);
+  // Lấy baseUrl (phần URL trước dấu '?')
+  const baseUrl = `${urlObject.origin}${urlObject.pathname}`;
+  // Lấy params từ chuỗi query
+  const params = new Map();
+  urlObject.searchParams.forEach((value, key) => {
+    params.set(key, value);
+  });
+  return {
+    baseUrl: baseUrl,
+    params: params
+  };
 }
