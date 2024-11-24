@@ -6,7 +6,7 @@ script.onload = function () {
   this.remove();
 };
 document.documentElement.appendChild(script);
-
+const textColor = "#1b1e6c"
 // Lắng nghe sự kiện 'crumbsData' được gửi từ inject.js
 window.addEventListener('crumbsData', (event) => {
   const crumbs = event.detail.crumbs;
@@ -21,6 +21,8 @@ window.addEventListener('crumbsData', (event) => {
 
     // URL API được xây dựng dựa trên crumbs
     const url = `https://realestate.yahoo.co.jp/api/v2/personal/favorite/conditions?bk=&crumb=${crumbs}&infoDiv=app`;
+    let topDiv = findListInfoMail()
+    addButtonToTopDiv(topDiv, url);    // Thêm button vào topDiv
 
     // Gửi yêu cầu GET tới API bằng jQuery AJAX
     $.ajax({
@@ -91,7 +93,7 @@ window.addEventListener('crumbsData', (event) => {
 
             // Tạo bảng
             let table = $('<table border="1" style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 10px;">');
-            let textColor = "#1b1e6c"
+            
             // Tạo header cho bảng
             table.append(`
               <thead style="background-color: ${textColor}; color: white; font-size: 1.1em;">
@@ -165,5 +167,67 @@ function cleanObject(obj) {
   // Chuyển object thành mảng các cặp key-value, lọc bỏ các giá trị không hợp lệ, rồi chuyển về object
   return Object.fromEntries(
     Object.entries(obj).filter(([key, value]) => value != null && value !== '')
+  );
+}
+
+/**
+ * Hàm tìm thẻ <div> có class="ListInfoMail" và id="_ListInfoMail"
+ * @returns {jQuery|null} - Trả về thẻ <div> nếu tìm thấy, hoặc null nếu không tìm thấy
+ */
+function findListInfoMail() {
+  // Sử dụng jQuery để tìm thẻ <div> với class và id cụ thể
+  const $div = $('div.ListInfoMail#_ListInfoMail');
+
+  // Kiểm tra nếu không tìm thấy, trả về null
+  if ($div.length === 0) {
+    console.error('Không tìm thấy thẻ <div> với class="ListInfoMail" và id="_ListInfoMail"');
+    return null;
+  }
+  // Trả về thẻ <div> tìm được
+  return $div;
+}
+
+/**
+ * Thêm button vào `topDiv` và xử lý sự kiện click
+ */
+function addButtonToTopDiv(topDiv, url) {
+  if (!topDiv || topDiv.length === 0) {
+    console.error("Không tìm thấy `topDiv` để thêm button.");
+    return;
+  }
+
+  // Tạo button
+  const button = $('<button>', {
+    text: '⚡️ MyCondition ⚡️', // Title của button
+    class: 'btn-get-info',               // Thêm class nếu cần styling
+    click: function () {
+      // Khi click, mở URL trong một tab mới
+      window.open(url, '_blank');
+    }
+  });
+
+  // Append button vào topDiv
+  topDiv.append(button);
+
+  // Optionally: Styling cho button
+  button.css({
+    padding: '10px 20px',
+    marginTop: '10px',
+    backgroundColor: textColor,
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px'
+  });
+
+  // Hover effect
+  button.hover(
+    function () {
+      $(this).css('backgroundColor', '#0056b3');
+    },
+    function () {
+      $(this).css('backgroundColor', textColor);
+    }
   );
 }
