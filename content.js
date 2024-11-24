@@ -11,7 +11,7 @@ const textColor = "#1b1e6c"
 window.addEventListener('crumbsData', (event) => {
   const crumbs = event.detail.crumbs;
 
-  sleep(500).then(() => {
+  sleep(1000).then(() => {
 
     // Kiểm tra nếu crumbs không tồn tại
     if (!crumbs) {
@@ -276,6 +276,10 @@ function addButtonToTopDiv(topDiv, url) {
  * @returns {Object} - Object chứa baseUrl và params (dạng Map)
  */
 function extractQuery(url) {
+  // Nếu URL thiếu domain, thêm domain của trang hiện tại
+  if (url.startsWith('/')) {
+    url = `${window.location.origin}${url}`;
+  }
   // Tạo đối tượng URL từ chuỗi url
   const urlObject = new URL(url);
   // Lấy baseUrl (phần URL trước dấu '?')
@@ -290,3 +294,4 @@ function extractQuery(url) {
     params: params
   };
 }
+
