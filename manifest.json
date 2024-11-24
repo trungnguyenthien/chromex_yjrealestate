@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Yahoo Real Estate Button",
+  "version": "1.0",
+  "description": "Thêm nút hiển thị thông báo trên trang yêu thích của Yahoo Real Estate",
+  "icons": {
+    "48": "icon.png"
+  },
+  "permissions": [],
+  "host_permissions": [
+    "https://realestate.yahoo.co.jp/personal/favorite/condition"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inject.js"
+      ],
+      "matches": [
+        "https://realestate.yahoo.co.jp/*"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://realestate.yahoo.co.jp/personal/favorite/condition"
+      ],
+      "js": [
+        "libs/jquery.min.js",
+        "libs/lodash.min.js",
+        "content.js"
+      ],
+      "css": [
+        "style.css"
+      ]
+    }
+  ]
+}
